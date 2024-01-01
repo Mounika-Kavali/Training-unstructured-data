@@ -1,0 +1,2 @@
+# Ignore GenAI-task folder with git add .gitignore
+GenAI-task/

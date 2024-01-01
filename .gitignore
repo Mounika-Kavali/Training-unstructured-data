@@ -1,2 +1,4 @@
 # Ignore GenAI-task folder with git add .gitignore
+.env
 GenAI-task/
+__pycache__

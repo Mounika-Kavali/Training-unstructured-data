@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Response UI</title>
+</head>
+<body>
+    <h1>Response</h1>
+    
+    <form id="queryForm">
+        <label for="userQuery">Enter your query:</label>
+        <input type="text" id="userQuery" name="user_query" required>
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="conversation-container">
+        <!-- Conversation history will be appended here dynamically -->
+    </div>
+
+    <script>
+        document.getElementById('queryForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const userQuery = document.getElementById('userQuery').value;
+
+            // JavaScript code to handle the response and display text and images
+            fetch('/generate_response', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    'user_query': userQuery
+                }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => {
+                response.json()})
+            .then(data => {
+                // Append user input to the conversation container
+                appendMessage('user', userQuery);
+
+                // Append bot response to the conversation container
+                appendMessage('bot', data.response_text);
+
+                // Display images (assuming 'image_mapping' is a dictionary with keys and image paths)
+                for (const key in data.image_mapping) {
+                    const imagePath = data.image_mapping[key];
+                    // Append image to the conversation container
+                    appendImage(imagePath, key);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        function appendMessage(sender, message) {
+            const conversationContainer = document.getElementById('conversation-container');
+            const messageElement = document.createElement('div');
+            messageElement.className = `${sender}-message`;
+            messageElement.textContent = `${sender.charAt(0).toUpperCase() + sender.slice(1)}: ${message}`;
+            conversationContainer.appendChild(messageElement);
+
+            // Scroll to the bottom to show the latest messages
+            conversationContainer.scrollTop = conversationContainer.scrollHeight;
+        }
+
+        function appendImage(imagePath, altText) {
+            const conversationContainer = document.getElementById('conversation-container');
+            const imgElement = document.createElement('img');
+            imgElement.src = imagePath;
+            imgElement.alt = altText;
+            conversationContainer.appendChild(imgElement);
+
+            // Scroll to the bottom to show the latest messages
+            conversationContainer.scrollTop = conversationContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>

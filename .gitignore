@@ -2,3 +2,4 @@
 .env
 GenAI-task/
 __pycache__
+extracted-images

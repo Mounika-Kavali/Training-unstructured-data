@@ -14,23 +14,18 @@ def run_inference(text, query):
         chunk_overlap=200,
         length_function=len
     )
-    print("text_splitter",text_splitter)
     chunks = text_splitter.split_text(text)
-    print("chunks",chunks)
 
     embeddings = OpenAIEmbeddings()
 
     #train_model
     knowledge_base = FAISS.from_texts(chunks, embeddings)
-    # print("knowledge_base",knowledge_base)
 
 
     docs = knowledge_base.similarity_search(query)
-    print("docs",docs)
 
     llm = OpenAI()
     chain = load_qa_chain(llm, chain_type="stuff")
     response = chain.run(input_documents=docs, question=query)
-    print("chain",chain)
 
     return response

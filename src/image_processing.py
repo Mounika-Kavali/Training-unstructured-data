@@ -15,7 +15,7 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 # Function to generate text for the image and user question
-def generate_text_for_image(image_path, user_question):
+def text_extraction_for_image(image_path, user_question):
     # Getting the base64 string
     base64_image = encode_image(image_path)
 
@@ -52,19 +52,20 @@ def generate_text_for_image(image_path, user_question):
 
 # Specify the folder path containing images
 image_folder = "data\imgs"
-
+combined_text_path = 'data\combined.txt'
 # Example user question
-user_question = "what are B2B services of zomato?"
+user_question = "Explain in detail about the image?"
 
 # Iterate over each image in the folder
-for image_file in os.listdir(image_folder):
-    if image_file.endswith(('.jpg', '.jpeg', '.png', '.webp')):
-        image_path = os.path.join(image_folder, image_file)
-        print("image_path", image_path)
-        
-        # Generate text for the image and user question
-        response_json = generate_text_for_image(image_path, user_question)
-        print("Generated Text:", response_json['choices'][0]['message']['content'])
+def generate_text_for_images():
+    for image_file in os.listdir(image_folder):
+        if image_file.endswith(('.jpg', '.jpeg', '.png', '.webp')):
+            image_path = os.path.join(image_folder, image_file)
+            
+            # Generate text for the image and user question
+            response_json = text_extraction_for_image(image_path, user_question)
+            print("Generated Text:", response_json['choices'][0]['message']['content'])
+            response= response_json['choices'][0]['message']['content']
+            with open(combined_text_path, 'a', encoding='utf-8') as file:
+                file.write(response)
 
-        # Print the result
-        print(f"User Question: {user_question}\nImage: {image_file}\n")

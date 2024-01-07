@@ -3,7 +3,7 @@
 from dotenv import load_dotenv
 import os
 import requests
-from src.combine_text import combine_text_from_pdfs,combine_images_from_pdfs
+from src.combine_text import combine_text_from_pdfs,combine_images_from_pdfs,combine_text_from_docx
 from src.inference import run_inference
 from src.image_processing import generate_text_for_images
 
@@ -19,7 +19,7 @@ CORS(app)
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
-ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', '.jpeg'}
+ALLOWED_EXTENSIONS = {'pdf', 'docx','png', 'jpg', '.jpeg'}
 
 pdf_folder_path = 'data/pdfs'
 image_folder_path = 'data/imgs'
@@ -41,7 +41,6 @@ def generate_response_route():
     
     # Check if there are PDF files in pdf_folder_path
     pdf_files = [file for file in os.listdir(pdf_folder_path) if file.endswith('.pdf')]
-    print("pdf_files in folder",pdf_files)
     # if pdf_files:
        
     pdf_images = combine_images_from_pdfs(pdf_folder_path, combined_image_path)
@@ -49,48 +48,42 @@ def generate_response_route():
     with open(combined_text_path, 'r', encoding='utf-8') as file:
         text = file.read()
     response = run_inference(text, user_query)
-        
-    # else:
-    #     # requesting a generic response
-    #     print("user_query for chatGPT3.5",user_query)
-    #     openai_response = requests.post(
-    #         'https://api.openai.com/v1/chat/completions',
-    #         json = {
-    #         "model": "gpt-3.5-turbo",
-    #         "messages": [{"role": "user", "content": user_query}],
-    #         # "temperature": 0
-    #         },
-    #         headers={
-    #             'Content-Type': 'application/json',
-    #             'Authorization': f'Bearer {api_key}',
-    #         }
-    #     )
-    #     response=openai_response.json()['choices'][0]['message']['content']
     
     return jsonify({'response': response})
 
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
+@app.route('/upload/<filename>', methods=['POST'])
+def upload_file(filename):
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'})
 
     file = request.files['file']
-
+    
     if file.filename == '':
         return jsonify({'error': 'No selected file'})
 
     if file and allowed_file(file.filename):
         # Secure the filename
         filename = secure_filename(file.filename)
+
         if filename.endswith('.pdf'):
             file.save(os.path.join(app.config['pdf_folder_path'], filename))
-             #EXTRACT TEXT FROM DOC FILE
+             #EXTRACT TEXT FROM PDF FILE
             combine_text_from_pdfs(pdf_folder_path, combined_text_path)
+             
+
         elif filename.endswith(('.png', '.jpg', '.jpeg')):
             file.save(os.path.join(app.config['image_folder_path'], filename))
-            #EXTRACT TEXT FROM IMAGE FILE
+             
+             #EXTRACT TEXT FROM IMAG FILE
             generate_text_for_images()
+            
+
+        elif filename.endswith('.docx'):
+            file.save(os.path.join(app.config['docx_folder_path'], filename))
+             
+            #EXTRACT TEXT FROM DOC FILE
+            combine_text_from_docx(docx_folder_path, combined_text_path)
         else:
             return jsonify({'error': 'Invalid file format'})
        
@@ -126,7 +119,7 @@ def remove_file(filename):
         #EXTRACT LATEST TEXT FROM IMAGE FOLDER
         generate_text_for_images()
         #EXTRACT LATEST TEXT FROM DOCX FOLDER
-        combine_text_from_pdfs(docx_folder_path, combined_text_path)
+        combine_text_from_docx(docx_folder_path, combined_text_path)
         return jsonify({'message': f'PDF file {filename} removed successfully'})
     elif os.path.exists(image_path):
         os.remove(image_path)
@@ -135,7 +128,7 @@ def remove_file(filename):
         #EXTRACT LATEST TEXT FROM IMAGE FOLDER
         generate_text_for_images()
         #EXTRACT LATEST TEXT FROM DOCX FOLDER
-        combine_text_from_pdfs(docx_folder_path, combined_text_path)
+        combine_text_from_docx(docx_folder_path, combined_text_path)
         return jsonify({'message': f'Image file {filename} removed successfully'})
     elif os.path.exists(docx_path):
         os.remove(docx_path)
@@ -144,7 +137,7 @@ def remove_file(filename):
         #EXTRACT LATEST TEXT FROM IMAGE FOLDER
         generate_text_for_images()
         #EXTRACT LATEST TEXT FROM DOCX FOLDER
-        combine_text_from_pdfs(docx_folder_path, combined_text_path)
+        combine_text_from_docx(docx_folder_path, combined_text_path)
         return jsonify({'message': f'Image file {filename} removed successfully'})
     else:
         return jsonify({'error': f'File {filename} not found'})

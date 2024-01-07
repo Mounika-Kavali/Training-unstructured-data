@@ -1,0 +1,5 @@
+# git ignore files
+extracted-images
+GenAI-task
+__pycache__
+.env

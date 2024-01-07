@@ -64,7 +64,7 @@ def generate_text_for_images():
             
             # Generate text for the image and user question
             response_json = text_extraction_for_image(image_path, user_question)
-            print("Generated Text:", response_json['choices'][0]['message']['content'])
+            # print("Generated Text:", response_json['choices'][0]['message']['content'])
             response= response_json['choices'][0]['message']['content']
             with open(combined_text_path, 'a', encoding='utf-8') as file:
                 file.write(response)

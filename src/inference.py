@@ -23,15 +23,12 @@ def run_inference(text, query):
     template = """
     Use the following pieces of context to answer the question at the end. 
     
-    If you don't find the relevant answer to the question from the input documents, just say I apologize, insufficient data provided.Never try to give a generic answer and also don't try to add extra information which is not present in the input documents.Even if user ask to explain about something which is not present in the input document, don't try to makeup any answer.
+   
+    If user question does not match to any context in the input documents then strictly just say- I appolozise, insufficient data provided.Never try to give a generic answer from the internet and also don't try to add extra information which is not present in the input documents.Even if user ask to explain about something which is not present in the input document, don't try to makeup any answer.
     
-    If you find the appropriate answer from the input documents to the question just describe clearly about it.If user doesnot given a proper question format just consider it as a complete question and find its relevant answer from the input documents and explain in detail about the given question.When user strictly ask to explain about something, you just describe it in lengthy way.
-
-    If the answer contains points or steps then display each one in newline(\n) with clear explanation.
+    If you find the relevant answer from the input documents to the user question then  describe about it clearly.If user does not given a proper question format just consider it as a complete question and find its relevant answer from the input documents and explain in detail about the given question.
 
     
-    when user ask any casual question, just greet and say Iam an AI,I can provide info on the uploaded files. How can I assist you?
-
     {context}
     chat_history: {chat_history}
     Human: {human_input}

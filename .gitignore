@@ -1,5 +1,5 @@
 # git ignore files
 extracted-images
-GenAI-task
+GenAI-venv
 __pycache__
 .env

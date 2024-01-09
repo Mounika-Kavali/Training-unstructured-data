@@ -47,26 +47,39 @@ def text_extraction_for_image(image_path, user_question):
     }
 
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-
+    print(response)
     return response.json()
 
 # Specify the folder path containing images
 image_folder = "data\imgs"
 combined_text_path = 'data\combined.txt'
-# Example user question
-user_question = "Explain in detail about image?"
+# user_question = "Explain in detail about image?"
 
 # Iterate over each image in the folder
-def generate_text_for_images():
-    for image_file in os.listdir(image_folder):
-        if image_file.endswith(('.jpg', '.jpeg', '.png', '.webp')):
-            image_path = os.path.join(image_folder, image_file)
+# def generate_text_for_images(user_query):
+#     print("generate_text_for_images called")
+#     for image_file in os.listdir(image_folder):
+#         if image_file.endswith(('.jpg', '.jpeg', '.png', '.webp')):
+#             image_path = os.path.join(image_folder, image_file)
             
-            # Generate text for the image and user question
-            response_json = text_extraction_for_image(image_path, user_question)
-            print("Generated Text:", response_json)
-            response= response_json['choices'][0]['message']['content']
-            with open(combined_text_path, 'a', encoding='utf-8') as file:
-                file.write(response)
+#             # Generate text for the image and user question
+#             response_json = text_extraction_for_image(image_path, user_query)
+#             print("Generated Text:", response_json['choices'][0]['message']['content'])
+            
 
-# generate_text_for_images()
+def generate_text_for_images(user_query, output_file="captions.txt"):
+    print("generate_text_for_images called")
+    
+    with open(output_file, 'w', encoding='utf-8') as captions_file:
+        for image_file in os.listdir(image_folder):
+            if image_file.endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                image_path = os.path.join(image_folder, image_file)
+
+                # Generate text for the image and user question
+                response_json = text_extraction_for_image(image_path, user_query)
+                caption = response_json['choices'][0]['message']['content']
+
+                # Write the image file name and caption to the file
+                captions_file.write(f"{image_file}: {caption}\n")
+                print(f"Caption for {image_file}: {caption}")
+generate_text_for_images("Generate a perfect caption to the image")

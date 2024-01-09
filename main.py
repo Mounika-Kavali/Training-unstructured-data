@@ -2,7 +2,6 @@
 
 from dotenv import load_dotenv
 import os
-import requests
 from src.combine_text import combine_text_from_pdfs,combine_images_from_pdfs,combine_text_from_docx
 from src.inference import run_inference
 from src.image_processing import generate_text_for_images
@@ -39,17 +38,16 @@ def allowed_file(filename):
 def generate_response_route():
     user_query = request.form.get('user_query')
     
-    # Check if there are PDF files in pdf_folder_path
-    pdf_files = [file for file in os.listdir(pdf_folder_path) if file.endswith('.pdf')]
-    # if pdf_files:
-       
-    pdf_images = combine_images_from_pdfs(pdf_folder_path, combined_image_path)
-    print("pdf_images",pdf_images)
-    with open(combined_text_path, 'r', encoding='utf-8') as file:
-        text = file.read()
-    response = run_inference(text, user_query)
-    
-    return jsonify({'response': response})
+    if "FROM THE IMAGE" in user_query:
+        return generate_text_for_images(user_query)
+    else:
+        pdf_images = combine_images_from_pdfs(pdf_folder_path, combined_image_path)
+        print("pdf_images",pdf_images)
+        with open(combined_text_path, 'r', encoding='utf-8') as file:
+            text = file.read()
+        response = run_inference(text, user_query)
+        
+        return jsonify({'response': response})
 
 
 @app.route('/upload/<filename>', methods=['POST'])
@@ -76,7 +74,7 @@ def upload_file(filename):
             file.save(os.path.join(app.config['image_folder_path'], filename))
              
              #EXTRACT TEXT FROM IMAG FILE
-            generate_text_for_images()
+            # generate_text_for_images()
             
 
         elif filename.endswith('.docx'):
